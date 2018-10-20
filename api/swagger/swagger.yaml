@@ -5,7 +5,7 @@ info:
 # basePath prefixes all resource paths
 basePath: /
 # Uncomment for local dev:
-# host: localhost:3030
+host: localhost:3030
 schemes:
   # Uncomment for local dev:
    - http
@@ -307,6 +307,10 @@ definitions:
       estimatedArrival:
         type: string
       scheduledArrival:
+        type: string
+      arrivalGate:
+        type: string
+      arrivalTerminal:
         type: string
   Airport:
     required:

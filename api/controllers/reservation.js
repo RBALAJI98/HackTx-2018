@@ -76,9 +76,10 @@ function createRecordLocator() {
 
 function retrieveReservation(recordLocator) {
     let reservations = mongoHelper.getDb().collection("reservation");
+    
     return new Promise(function(resolve, reject) {
         try {
-            reservations.findOne({"recordLocator": recordLocator}, function(err, reservation) {
+            reservations.findOne({'recordLocator': recordLocator}, function(err, reservation) {
                 if (err) {
                     console.log(err);
                     resolve({"err": err});
@@ -94,6 +95,10 @@ function retrieveReservation(recordLocator) {
             reject({"err": err});
         }
     });
+}
+
+function retrieveReservationName(firstName){
+    
 }
 
 function hydrateReservationResponse(reservation) {
