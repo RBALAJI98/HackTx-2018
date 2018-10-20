@@ -8,8 +8,8 @@ basePath: /
 # host: localhost:3030
 schemes:
   # Uncomment for local dev:
-  # - http
-  - https
+   - http
+  #- https
 # format of bodies a client can send (Content-Type)
 consumes:
   - application/json
