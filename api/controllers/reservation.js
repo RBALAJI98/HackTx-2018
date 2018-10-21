@@ -11,6 +11,11 @@ mongoose.connect('mongodb://localhost:27017/myapp' , function(err){
     console.log("succesfully connected");
 });
 
+module.exports = {
+    reservation: reservation,
+    createReservation: createReservation
+};
+
 
 function reservation(req, res) {
     var recordLocator = _.get(req, "swagger.params.recordLocator.value");
