@@ -7,7 +7,8 @@ const flights           = require('./flight');
 
 module.exports = {
     reservation: reservation,
-    createReservation: createReservation
+    createReservation: createReservation,
+    isLanded: isLanded
 };
 
 function reservation(req, res) {
@@ -97,9 +98,44 @@ function retrieveReservation(recordLocator) {
     });
 }
 
-function retrieveReservationName(firstName){
+
+function getFlightLanded(reservation){
+    for (var i = 0; i < reservation.flights.length; i++){
+        var currTime = Date.now();
+        var landTime = new Date(reservation.flights[i].arrivalTime);
+        if (currTime > landTime.getTime()){
+            return reservation.flights[i]._id;
+        }
+    }
+    return -1;
+ }
+
+
+function isLanded(req, res){
+    
+    var recordLocator = _.get(req, "swagger.params.firstName.value");
+    if (recordLocator != null && recordLocator != "") {
+        let reservation = retrieveReservation(recordLocator).then(function(reservation) {
+            if (reservation != null && _.get(reservation, "err") == null) {
+                hydrateReservationResponse(reservation).then(function(hydratedReservation) {
+                    var flightId = getFlightLanded(hydratedReservation);
+                    res.json(flightId);
+                    return;
+                }).catch(function(err) {
+                    res.status(500).json({"error": "Reservation retrieval failed", "err": err});
+                });
+            } else {
+                res.status(500).json({"error": "Reservation could not be found"});
+            }
+        });
+    } else {
+        res.status(500).json({"error": "Reservation could not be found"});
+    }
+
     
 }
+
+
 
 function hydrateReservationResponse(reservation) {
     return new Promise(function(resolve, reject) {

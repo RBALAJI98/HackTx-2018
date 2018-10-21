@@ -97,6 +97,30 @@ paths:
           description: User could not be created
           schema:
             type: string
+           
+  /isLanded:
+    x-swagger-router-controller: reservation
+    get:
+      description: Returns the flight id if a users flight has landed
+      tags:
+        - Reservation
+      operationId: isLanded            
+      parameters:
+        - name: firstName
+          in: query
+          description: "name of passenger"
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/FlightId"
+        "500":
+            description: Reservation not found
+            schema:
+              type: string    
   /reservation:
     x-swagger-router-controller: reservation
     get:
@@ -342,3 +366,5 @@ definitions:
       - Male
       - Female
       - Other
+  FlightId:
+    type: string
