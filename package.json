@@ -26,6 +26,8 @@
     "express": "^4.16.3",
     "lodash": "^4.17.11",
     "mongodb": "^2.2.36",
+    "mongoose": "^5.3.4",
+    "node-fetch": "^2.2.0",
     "randomstring": "^1.1.5",
     "swagger": "^0.7.5",
     "swagger-editor": "^3.6.11",

@@ -336,6 +336,8 @@ definitions:
         type: string
       arrivalTerminal:
         type: string
+      hasLanded:
+        type: string
   Airport:
     required:
       - code

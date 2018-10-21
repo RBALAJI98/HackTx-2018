@@ -4,12 +4,13 @@ const mongoHelper       = require('../helpers/mongoHelper');
 const randomstring      = require('randomstring');
 const users             = require('./user');
 const flights           = require('./flight');
+var mongoose = require('mongoose');
+var fetch = require("node-fetch");
+mongoose.connect('mongodb://localhost:27017/myapp' , function(err){
+    if(err) throw err;
+    console.log("succesfully connected");
+});
 
-module.exports = {
-    reservation: reservation,
-    createReservation: createReservation,
-    isLanded: isLanded
-};
 
 function reservation(req, res) {
     var recordLocator = _.get(req, "swagger.params.recordLocator.value");
@@ -99,17 +100,67 @@ function retrieveReservation(recordLocator) {
 }
 
 
-function getFlightLanded(reservation){
-    for (var i = 0; i < reservation.flights.length; i++){
-        var currTime = Date.now();
-        var landTime = new Date(reservation.flights[i].arrivalTime);
-        if (currTime > landTime.getTime()){
-            return reservation.flights[i]._id;
-        }
-    }
-    return -1;
- }
+function getFlightLanded(){
+    let reserve;
+    let reservations = mongoHelper.getDb().collection("reservation");
+    var names = ['Lalo', 'Ricardo', 'Amble'];
 
+    for(var j = 0; j<names.length; j++){
+        let reservation = retrieveReservation(names[j]).then(function(reservation) {
+            if (reservation != null && _.get(reservation, "err") == null) {
+                hydrateReservationResponse(reservation).then(function(hydratedReservation){
+                    reserve = hydratedReservation;
+                    for (var i = 0; i < reserve.flights.length; i++){
+                        var currTime = Date.now();
+                        var landTime = new Date(reserve.flights[i].arrivalTime);
+                        if (currTime > landTime.getTime() && reserve.flights[i].hasLanded === "0"){
+            
+            
+                            var name = reserve.recordLocator;
+                            console.log(name);
+                            var airport = reserve.flights[i].origin;
+                            console.log(airport);
+                            var data = {firstName: name, airportCode: airport };
+                            var url = 'http://e9e8e304.ngrok.io/send';
+            
+                          
+            
+                            var flightId = mongoose.Types.ObjectId(reserve.flights[i]._id);
+                            var myquery = { '_id' : flightId };
+                            var newVal = { $set : { 'hasLanded' : '1' } };
+                            let flights = mongoHelper.getDb().collection("flight");
+                            flights.updateOne(myquery, newVal, function(err, res) {
+                                if (err){
+                                    console.log("error updating db");
+                                }
+                                else {
+                                    console.log(res.result);
+                                    console.log("hasLanded updated");
+                                }
+            
+                            });
+                            console.log(reserve.flights[i]._id);
+                            console.log(data);
+                            fetch(url, {
+                                method: 'POST', // or 'PUT'
+                                body: JSON.stringify(data), // data can be `string` or {object}!
+                                headers:{
+                                  'Content-Type': 'application/json'
+                                }
+                              }).then(res => res.json())
+                              .then(response => console.log('Success:', JSON.stringify(response)))
+                              .catch(error => console.error('Error:', error));
+                        }   
+                    }
+                    
+                });
+            }
+        });
+      
+    }
+}
+
+setInterval(getFlightLanded, 1500);
 
 function isLanded(req, res){
     
@@ -118,9 +169,11 @@ function isLanded(req, res){
         let reservation = retrieveReservation(recordLocator).then(function(reservation) {
             if (reservation != null && _.get(reservation, "err") == null) {
                 hydrateReservationResponse(reservation).then(function(hydratedReservation) {
-                    var flightId = getFlightLanded(hydratedReservation);
-                    res.json(flightId);
-                    return;
+                    var flightId = setInterval( function() { getFlightLanded(hydratedReservation)} , 1500);
+                    //res.json(flightId);
+                    if (flightId !== -1){
+                        return;
+                    }
                 }).catch(function(err) {
                     res.status(500).json({"error": "Reservation retrieval failed", "err": err});
                 });
