@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/AmericanAirlines/AA-Mock-Engine#readme",
   "dependencies": {
+    "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "dotenv": "^4.0.0",
     "email-validator": "^1.2.3",

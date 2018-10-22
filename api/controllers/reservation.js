@@ -6,6 +6,7 @@ const users             = require('./user');
 const flights           = require('./flight');
 var mongoose = require('mongoose');
 var fetch = require("node-fetch");
+var axios = require("axios");
 mongoose.connect('mongodb://localhost:27017/myapp' , function(err){
     if(err) throw err;
     console.log("succesfully connected");
@@ -106,6 +107,7 @@ function retrieveReservation(recordLocator) {
 
 
 function getFlightLanded(){
+    //console.log(-1);
     let reserve;
     let reservations = mongoHelper.getDb().collection("reservation");
     var names = ['Lalo', 'Ricardo', 'Amble'];
@@ -123,10 +125,10 @@ function getFlightLanded(){
             
                             var name = reserve.recordLocator;
                             console.log(name);
-                            var airport = reserve.flights[i].origin;
+                            var airport = reserve.flights[i].destination;
                             console.log(airport);
                             var data = {firstName: name, airportCode: airport };
-                            var url = 'http://e9e8e304.ngrok.io/send';
+                            var url = 'http://5fd68a34.ngrok.io/send';
             
                           
             
@@ -144,17 +146,30 @@ function getFlightLanded(){
                                 }
             
                             });
+
+                            var test = JSON.stringify(data);
+                            console.log(JSON.parse(test));
                             console.log(reserve.flights[i]._id);
                             console.log(data);
-                            fetch(url, {
-                                method: 'POST', // or 'PUT'
-                                body: JSON.stringify(data), // data can be `string` or {object}!
-                                headers:{
-                                  'Content-Type': 'application/json'
-                                }
-                              }).then(res => res.json())
-                              .then(response => console.log('Success:', JSON.stringify(response)))
-                              .catch(error => console.error('Error:', error));
+
+                            var headers = {
+                                'Content-Type': 'application/json'
+                               
+                            };
+                            var data = {
+                                "name": name,
+                                "airportCode": airport
+                            };
+                            axios.post(url, data, {headers: headers})
+                        
+                                .then((response) => {
+                        
+                                    
+                                })
+                                .catch((error) => {
+                                    console.log(error);
+                                })
+                           
                         }   
                     }
                     
